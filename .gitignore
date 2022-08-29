@@ -1,0 +1,15 @@
+DUMMY1
+DUMMY2
+DUMMY3
+models
+wav_result
+logs
+__pycache__
+.ipynb_checkpoints
+.*.swp
+
+build
+*.c
+monotonic_align/monotonic_align
+/.vs/vits/FileContentIndex
+/model
