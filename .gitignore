@@ -12,7 +12,7 @@ build
 *.c
 monotonic_align/monotonic_align
 /.vs/vits/FileContentIndex
-/model
-/playSounds
-/.git
-/.idea
+model
+playSounds
+.git
+.idea
