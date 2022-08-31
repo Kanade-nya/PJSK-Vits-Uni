@@ -101,14 +101,17 @@ def get_text(text, hps, symbols):
 
 def jtts(text, type, symbols, multiSpeaker):
     stn_tst = None
-    if type == 1 or type == 4:
-        stn_tst = get_text(japanese_tokenization_cleaners(text), hps, symbols)
-    elif type == 2:
-        stn_tst = get_text(japanese_cleaners(text), hps, symbols)
-    elif type == 3:
-        stn_tst = get_text(japanese_cleaners2(text), hps, symbols)
-    if not os.path.exists('playSounds'):
-        os.makedirs('playSounds')
+    try:
+        if type == 1 or type == 4:
+            stn_tst = get_text(japanese_tokenization_cleaners(text), hps, symbols)
+        elif type == 2:
+            stn_tst = get_text(japanese_cleaners(text), hps, symbols)
+        elif type == 3:
+            stn_tst = get_text(japanese_cleaners2(text), hps, symbols)
+        if not os.path.exists('playSounds'):
+            os.makedirs('playSounds')
+    except KeyError as e:
+        return 'KeyError: ' + str(e)
     with torch.no_grad():
         x_tst = stn_tst.unsqueeze(0)
         x_tst_lengths = torch.LongTensor([stn_tst.size(0)])
@@ -119,7 +122,7 @@ def jtts(text, type, symbols, multiSpeaker):
                     net_g.infer(x_tst, x_tst_lengths, sid=sid, noise_scale=.667, noise_scale_w=0.8, length_scale=1)[0][
                         0, 0].data.float().numpy()
             except Exception as e:
-                print(e)
+                return e
         else:
             try:
                 audio = \
@@ -127,7 +130,7 @@ def jtts(text, type, symbols, multiSpeaker):
                         0][
                         0, 0].data.float().numpy()
             except Exception as e:
-                print(e)
+                return e
 
         #######
         # 这里的radio是一个浮点数列表，相当于音频的内容，也可以不保存直接输出?
