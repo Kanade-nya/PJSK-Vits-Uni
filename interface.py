@@ -134,45 +134,55 @@ def jtts(text, type, symbols, multiSpeaker):
         #######
         filename = 'playSounds/' + text.replace('?', '') + str(random.randint(1, 100)) + '.wav'
         sf.write(filename, audio, 22050)
+        ###### 看选择返回什么了，文件还是audio列表
+        return audio
+
+def output_tts(character,text,generator):
+    if character in characterDict and character != generator.getCharacter():
+        # 选择单目标或多目标
+        if character in multiDict:
+            generator.changeSpeakers(True, character)
+        else:
+            generator.changeSpeakers(False)
+        generator.changeCharater(character)
+        generator.changeSymbols(characterDict[character][2])
+        # 加载参数
+        print(characterDict[character][0])
+        global hps
+        hps = utils.get_hparams_from_file(characterDict[character][0])
+        global net_g
+        net_g = SynthesizerTrn(
+            len(generator.getSymbols()),
+            hps.data.filter_length // 2 + 1,
+            hps.train.segment_size // hps.data.hop_length,
+            n_speakers=hps.data.n_speakers,
+            **hps.model)
+        net_g.eval()
+        # 加载模型
+        print(characterDict[character][1])
+        _ = utils.load_checkpoint(characterDict[character][1], net_g, None)
+        # text ,type(int) ,symbol(list),multi(list[bool,int])
+        return jtts(text, characterDict[character][2], generator.getSymbols(),
+             [generator.getSpeakers(), generator.getMultiId()])
+    elif character in characterDict:
+        return jtts(text, characterDict[character][2], generator.getSymbols(),
+             [generator.getSpeakers(), generator.getMultiId()])
+    else:
+        return 'character error'
 
 
-hps = None
-net_g = None
+
 
 if __name__ == '__main__':
     generator = Generator()
+    ## 下面两个是全局变量
+    hps = None
+    net_g = None
     while True:
         # 模拟输入角色
         character = input()
         # 模拟输入台词
-        text = 'そっかー、迷子になっちゃったんだね。ひとりでがんばったね。でも、もう大丈夫だよ'
-        if character in characterDict and character != generator.getCharacter():
-            # 选择单目标或多目标
-            if character in multiDict:
-                generator.changeSpeakers(True, character)
-            else:
-                generator.changeSpeakers(False)
-            generator.changeCharater(character)
-            generator.changeSymbols(characterDict[character][2])
-            # 加载参数
-            print(characterDict[character][0])
-            hps = utils.get_hparams_from_file(characterDict[character][0])
-            net_g = SynthesizerTrn(
-                len(generator.getSymbols()),
-                hps.data.filter_length // 2 + 1,
-                hps.train.segment_size // hps.data.hop_length,
-                n_speakers=hps.data.n_speakers,
-                **hps.model)
-            net_g.eval()
-            #加载模型
-            print(characterDict[character][1])
-            _ = utils.load_checkpoint(characterDict[character][1], net_g, None)
-            # text ,type(int) ,symbol(list),multi(list[bool,int])
-            jtts(text, characterDict[character][2], generator.getSymbols(),
-                 [generator.getSpeakers(), generator.getMultiId()])
-        elif character in characterDict:
-            jtts(text, characterDict[character][2], generator.getSymbols(),
-                 [generator.getSpeakers(), generator.getMultiId()])
-        else:
-            print('character error')
-            continue
+        text = '今日の天気は良いです'
+        audio_list = output_tts(character,text,generator)
+        print(audio_list)
+
