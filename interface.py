@@ -11,20 +11,35 @@ import soundfile as sf
 import janome
 
 characterDict = {
-    'airi': ['./configs/airi.json', './model/airi_v1.0.pth', 1],
-    'ena': ['./configs/ena.json', './model/ena_v1.0.pth', 3],
+    'saki': ['./configs/saki.json', './model/saki_v1.0.pth', 1],
     'ichika': ['./configs/ichika.json', './model/ichika_v1.0.pth', 2],
+    'honami': ['./configs/honami.json', './model/honami_v1.0.pth', 3],
+    'shiho': ['./configs/shiho.json', './model/shiho_v1.0.pth', 3],
+
     'kanade': ['./configs/kanade.json', './model/kanade_v1.0.pth', 4],
+    'ena': ['./configs/ena.json', './model/ena_v1.0.pth', 3],
     'mafuyu0': ['./configs/mafuyu.json', './model/mafuyu_v1.0.pth', 3],
     'mafuyu1': ['./configs/mafuyu.json', './model/mafuyu_v1.0.pth', 3],
     'mizuki': ['./configs/mizuki.json', './model/mizuki_v1.0.pth', 1],
-    'saki': ['./configs/saki.json', './model/saki_v1.0.pth', 1],
+
+    'airi': ['./configs/airi.json', './model/airi_v1.0.pth', 1],
     'minori': ['./configs/mmj.json', './model/mmj_v1.0.pth', 3],
     'haruka': ['./configs/mmj.json', './model/mmj_v1.0.pth', 3],
     'shizuku': ['./configs/mmj.json', './model/mmj_v1.0.pth', 3],
+
+    'akito': ['./configs/vbs.json', './model/vbs_v1.1.pth', 3],
+    'an': ['./configs/vbs.json', './model/vbs_v1.1.pth', 3],
+    'kohane': ['./configs/vbs.json', './model/vbs_v1.1.pth', 3],
+    'toya': ['./configs/vbs.json', './model/vbs_v1.1.pth', 3],
+
+    'emu': ['./configs/ws.json', './model/ws_v1.1.pth', 3],
+    'nene': ['./configs/ws.json', './model/ws_v1.1.pth', 3],
+    'rui': ['./configs/ws.json', './model/ws_v1.1.pth', 3],
+    'tsukasa': ['./configs/ws.json', './model/ws_v1.1.pth', 3],
 }
 
-multiDict = ['mafuyu0', 'mafuyu1', 'minori', 'haruka', 'shizuku']
+multiDict = ['mafuyu0', 'mafuyu1', 'minori', 'haruka', 'shizuku', 'akito', 'an', 'kohane', 'toya', 'emu', 'nene', 'rui',
+             'tsukasa']
 
 
 class Generator:
@@ -48,13 +63,13 @@ class Generator:
     def changeSpeakers(self, flag, cStr='none'):
         if flag:
             self.multiSpeakers = True
-            if cStr == 'minori' or cStr == 'mafuyu0':
+            if cStr == 'minori' or cStr == 'mafuyu0' or cStr == 'akito' or cStr == 'emu':
                 self.multiId = 0
-            elif cStr == 'haruka' or cStr == 'mafuyu1':
+            elif cStr == 'haruka' or cStr == 'mafuyu1' or cStr == 'an' or cStr == 'nene':
                 self.multiId = 1
-            elif cStr == 'airi':
+            elif cStr == 'airi' or cStr == 'kohane' or cStr == 'rui':
                 self.multiId = 2
-            elif cStr == 'shizuku':
+            elif cStr == 'shizuku' or cStr == 'toya' or cStr == 'tsukasa':
                 self.multiId = 3
         elif not flag:
             self.multiSpeakers = False
@@ -140,7 +155,8 @@ def jtts(text, type, symbols, multiSpeaker):
         ###### 看选择返回什么了，文件还是audio列表
         return audio
 
-def output_tts(character,text,generator):
+
+def output_tts(character, text, generator):
     if character in characterDict and character != generator.getCharacter():
         # 选择单目标或多目标
         if character in multiDict:
@@ -166,14 +182,12 @@ def output_tts(character,text,generator):
         _ = utils.load_checkpoint(characterDict[character][1], net_g, None)
         # text ,type(int) ,symbol(list),multi(list[bool,int])
         return jtts(text, characterDict[character][2], generator.getSymbols(),
-             [generator.getSpeakers(), generator.getMultiId()])
+                    [generator.getSpeakers(), generator.getMultiId()])
     elif character in characterDict:
         return jtts(text, characterDict[character][2], generator.getSymbols(),
-             [generator.getSpeakers(), generator.getMultiId()])
+                    [generator.getSpeakers(), generator.getMultiId()])
     else:
         return 'character error'
-
-
 
 
 if __name__ == '__main__':
@@ -186,6 +200,5 @@ if __name__ == '__main__':
         character = input()
         # 模拟输入台词
         text = '今日の天気は良いです'
-        audio_list = output_tts(character,text,generator)
+        audio_list = output_tts(character, text, generator)
         print(audio_list)
-
